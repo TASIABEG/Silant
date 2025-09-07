@@ -1,0 +1,49 @@
+{% extends "monitoring/base.html" %}
+
+{% block page_title %}
+{% if object %}Редактирование рекламации{% else %}Добавление новой рекламации{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="card mb-4">
+            <div class="card-header">Детали рекламации</div>
+            <div class="card-body">
+                <div class="row">
+                    {% for field in form %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ field.errors|striptags }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    {% if object %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Время простоя (дней)</label>
+                        <input type="text" class="form-control" value="{{ object.downtime }}" disabled>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">
+                {% if object %}Сохранить{% else %}Добавить{% endif %}
+            </button>
+            <a href="{% url 'monitoring:reclamation_list' %}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

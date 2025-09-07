@@ -1,0 +1,39 @@
+{% extends "monitoring/base.html" %}
+
+{% block title %}Рекламация по {{ reclamation.machine.serial_number }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Рекламация: {{ reclamation.machine.serial_number }}</h1>
+        <div>
+            {% if can_edit %}
+            <a href="{% url 'monitoring:reclamation_edit' reclamation.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Редактировать
+            </a>
+            {% endif %}
+            <a href="{% url 'monitoring:reclamation_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> К списку
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            Подробности рекламации
+        </div>
+        <div class="card-body">
+            <p><strong>Машина:</strong> {{ reclamation.machine.serial_number }}</p>
+            <p><strong>Дата отказа:</strong> {{ reclamation.failure_date }}</p>
+            <p><strong>Наработка:</strong> {{ reclamation.operating_hours }} м/час</p>
+            <p><strong>Узел отказа:</strong> {{ reclamation.failure_node.name }}</p>
+            <p><strong>Описание отказа:</strong> {{ reclamation.failure_description }}</p>
+            <p><strong>Способ восстановления:</strong> {{ reclamation.recovery_method.name }}</p>
+            <p><strong>Используемые запчасти:</strong> {{ reclamation.spare_parts_used|default:"-" }}</p>
+            <p><strong>Дата восстановления:</strong> {{ reclamation.recovery_date }}</p>
+            <p><strong>Сервисная компания:</strong> {{ reclamation.service_company.username|default:"-" }}</p>
+            <p><strong>Время простоя:</strong> {{ reclamation.downtime }} дней</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

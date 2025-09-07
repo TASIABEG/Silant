@@ -1,0 +1,223 @@
+{% extends "monitoring/base.html" %}
+
+{% block title %}Машина {{ machine.serial_number }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Заголовок и кнопки -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Машина: {{ machine.serial_number }}</h1>
+        <div>
+            {% if can_edit_machine %}
+            <a href="{% url 'monitoring:machine_edit' machine.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Редактировать
+            </a>
+            {% endif %}
+            <a href="{% url 'monitoring:machine_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> К списку
+            </a>
+        </div>
+    </div>
+
+    <!-- Вкладки -->
+    <ul class="nav nav-tabs mb-4" id="machineTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tech-data-tab" data-bs-toggle="tab"
+                    data-bs-target="#tech-data" type="button" role="tab">
+                Технические данные
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="to-tab" data-bs-toggle="tab"
+                    data-bs-target="#to" type="button" role="tab">
+                Техническое обслуживание
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="reclamations-tab" data-bs-toggle="tab"
+                    data-bs-target="#reclamations" type="button" role="tab">
+                Рекламации
+            </button>
+        </li>
+    </ul>
+
+    <!-- Содержимое вкладок -->
+    <div class="tab-content" id="machineTabsContent">
+        <!-- Вкладка 1: Технические данные -->
+        <div class="tab-pane fade show active" id="tech-data" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h2 class="mb-0">Основные характеристики</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Заводской номер:</strong> {{ machine.serial_number }}</p>
+                            <p><strong>Модель техники:</strong> {{ machine.machine_model.name }}</p>
+                            <p><strong>Двигатель:</strong> {{ machine.engine_model.name }} ({{ machine.engine_serial }})</p>
+                            <p><strong>Трансмиссия:</strong> {{ machine.transmission_model.name }} ({{ machine.transmission_serial }})</p>
+                            <p><strong>Ведущий мост:</strong> {{ machine.drive_axle_model.name }} ({{ machine.drive_axle_serial }})</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Управляемый мост:</strong> {{ machine.steering_axle_model.name }} ({{ machine.steering_axle_serial }})</p>
+                            <p><strong>Дата отгрузки:</strong> {{ machine.shipment_date }}</p>
+                            <p><strong>Наработка:</strong> {{ machine.current_hours }} м/час</p>
+                            <p><strong>Статус:</strong>
+                                {% if machine.in_service %}
+                                    <span class="badge bg-danger">В сервисе</span>
+                                {% elif machine.requires_maintenance %}
+                                    <span class="badge bg-warning">Требуется ТО</span>
+                                {% else %}
+                                    <span class="badge bg-success">Работоспособна</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            <h3 class="mb-0">Дополнительная информация</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Договор поставки:</strong> {{ machine.supply_contract }}</p>
+                                    <p><strong>Грузополучатель:</strong> {{ machine.consignee }}</p>
+                                    <p><strong>Адрес поставки:</strong> {{ machine.delivery_address }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Комплектация:</strong> {{ machine.equipment }}</p>
+                                    <p><strong>Клиент:</strong> {{ machine.client.get_full_name|default:machine.client.username }}</p>
+                                    <p><strong>Сервисная компания:</strong>
+                                        {% if machine.service_company %}
+                                            {{ machine.service_company.get_full_name|default:machine.service_company.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка 2: Техническое обслуживание -->
+        <div class="tab-pane fade" id="to" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Техническое обслуживание</h2>
+                {% if can_add_service %}
+                <a href="{% url 'monitoring:service_create' machine.pk %}" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Добавить ТО
+                </a>
+                {% endif %}
+            </div>
+
+            {% if to_with_permissions %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Дата ТО</th>
+                            <th>Вид ТО</th>
+                            <th>Наработка</th>
+                            <th>Организация</th>
+                            <th>Заказ-наряд</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in to_with_permissions %}
+                        <tr>
+                            <td>{{ item.object.service_date }}</td>
+                            <td>{{ item.object.service_type.name }}</td>
+                            <td>{{ item.object.operating_hours }} м/час</td>
+                            <td>{{ item.object.service_organization.name }}</td>
+                            <td>{{ item.object.work_order_number }} от {{ item.object.work_order_date }}</td>
+                            <td>
+                                <a href="{% url 'monitoring:technical_service_detail' item.object.pk %}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if item.can_edit %}
+                                <a href="{% url 'monitoring:service_edit' item.object.pk %}"
+                                   class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                Нет записей о техническом обслуживании для этой машины.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Вкладка 3: Рекламации -->
+        <div class="tab-pane fade" id="reclamations" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Рекламации</h2>
+                {% if can_add_reclamation %}
+                <a href="{% url 'monitoring:reclamation_create' machine.pk %}" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Добавить рекламацию
+                </a>
+                {% endif %}
+            </div>
+
+            {% if reclamations_with_permissions %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Дата отказа</th>
+                            <th>Узел отказа</th>
+                            <th>Описание</th>
+                            <th>Способ восстановления</th>
+                            <th>Время простоя</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in reclamations_with_permissions %}
+                        <tr>
+                            <td>{{ item.object.failure_date }}</td>
+                            <td>{{ item.object.failure_node.name }}</td>
+                            <td>{{ item.object.failure_description|truncatechars:50 }}</td>
+                            <td>{{ item.object.recovery_method.name }}</td>
+                            <td>{{ item.object.downtime }} дней</td>
+                            <td>
+                                <a href="{% url 'monitoring:reclamation_detail' item.object.pk %}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if item.can_edit %}
+                                <a href="{% url 'monitoring:reclamation_edit' item.object.pk %}"
+                                   class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                Нет записей о рекламациях для этой машины.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

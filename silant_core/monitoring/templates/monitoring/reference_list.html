@@ -1,0 +1,45 @@
+{% extends "monitoring/base.html" %}
+
+{% block title %}Справочники{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Справочники</h1>
+        {% if user.role == 'manager' %}
+        <a href="{% url 'monitoring:reference_add' %}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Добавить
+        </a>
+        {% endif %}
+    </div>
+
+    {% if references %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ref in references %}
+                <tr>
+                    <td>{{ ref.name }}</td>
+                    <td>{{ ref.description|truncatechars:50 }}</td>
+                    <td>
+                        <a href="{% url 'monitoring:reference_edit' ref.pk %}" class="btn btn-sm btn-outline-warning">
+                            <i class="bi bi-pencil"></i> Редактировать
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">Справочники отсутствуют</div>
+    {% endif %}
+</div>
+{% endblock %}

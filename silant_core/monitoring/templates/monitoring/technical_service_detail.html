@@ -1,0 +1,27 @@
+{% extends "monitoring/base.html" %}
+
+{% block title %}Детали ТО{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>ТО для машины: {{ service.machine }}</h1>
+
+    <ul class="list-group my-3">
+        <li class="list-group-item"><strong>Вид ТО:</strong> {{ service.service_type.name|default:"Не указано" }}</li>
+        <li class="list-group-item"><strong>Дата проведения:</strong> {{ service.service_date|default:"Не указано" }}</li>
+        <li class="list-group-item"><strong>Наработка, м/час:</strong> {{ service.operating_hours|default:"Не указано" }}</li>
+        <li class="list-group-item"><strong>№ заказ-наряда:</strong> {{ service.work_order_number|default:"Не указано" }}</li>
+        <li class="list-group-item"><strong>Дата заказ-наряда:</strong> {{ service.work_order_date|default:"Не указано" }}</li>
+        <li class="list-group-item"><strong>Организация, проводившая ТО:</strong> {{ service.service_organization.name|default:"Не указано" }}</li>
+        <li class="list-group-item"><strong>Сервисная компания:</strong> {{ service.service_company.username|default:"Не указано" }}</li>
+    </ul>
+
+    <a href="{% url 'monitoring:technical_service_list' %}" class="btn btn-secondary">Назад</a>
+
+    {% if user.role == 'service' or user.role == 'manager' %}
+        <a href="{% url 'monitoring:service_edit' pk=service.pk %}" class="btn btn-warning">
+            Редактировать
+        </a>
+    {% endif %}
+</div>
+{% endblock %}

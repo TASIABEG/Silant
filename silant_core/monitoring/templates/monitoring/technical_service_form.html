@@ -1,0 +1,73 @@
+{% extends "monitoring/base.html" %}
+
+{% block title %}
+    {% if technical_service %}
+        Редактировать ТО
+    {% else %}
+        Добавить ТО
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>
+        {% if technical_service %}
+            Редактировать ТО
+        {% else %}
+            Добавить ТО
+        {% endif %}
+    </h1>
+
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.machine.as_hidden }}
+            {% if form.machine.errors %}
+                <div class="text-danger">{{ form.machine.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Вид ТО</label>
+            {{ form.service_type }}
+            {% if form.service_type.errors %}
+                <div class="text-danger">{{ form.service_type.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Дата ТО</label>
+            {{ form.service_date }}
+            {% if form.service_date.errors %}
+                <div class="text-danger">{{ form.service_date.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Наработка, м/час</label>
+            {{ form.operating_hours }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">№ заказ-наряда</label>
+            {{ form.work_order_number }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Дата заказ-наряда</label>
+            {{ form.work_order_date }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Организация, проводившая ТО</label>
+            {{ form.service_organization }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Сервисная компания</label>
+            {{ form.service_company }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            {% if technical_service %}Сохранить{% else %}Создать{% endif %}
+        </button>
+        <a href="{% url 'monitoring:technical_service_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}
