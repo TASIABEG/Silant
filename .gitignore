@@ -1,0 +1,15 @@
+# Виртуальное окружение
+venv/
+__pycache__/
+*.pyc
+
+# site-packages
+Lib/
+Scripts/
+pyvenv.cfg
+
+# IDE
+.idea/
+
+# Разное
+*.log
